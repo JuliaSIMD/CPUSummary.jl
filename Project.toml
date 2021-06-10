@@ -10,6 +10,9 @@ Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 Static = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
 
 [compat]
+Hwloc = "2"
+IfElse = "0.1"
+Static = "0.2"
 julia = "1.4"
 
 [extras]
