@@ -198,6 +198,7 @@ end
   nothing
 end
 
+unwrap(::Val{S}) where {S} = S
 function redefine_cache(N)
   s = cache_size(StaticInt(N))
   l = cache_linesize(StaticInt(N))
