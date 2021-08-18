@@ -22,7 +22,8 @@ function count_attr(topology::Hwloc.Object, attr::Symbol)
   for t ∈ topology
     count += t.type_ === attr
   end
-  if ((Sys.ARCH === :aarch64) && Sys.isapple()) && (attr === :Core)
+  if ((Sys.ARCH === :aarch64) && Sys.isapple()) && ((attr === :Core) | (attr === :PU))
+    # count big cores only on Apple, as one process can only use big or small cores at a time.
     count >>>= one(count) # FIXME: how to actually identify big cores???
   end
   count
