@@ -89,11 +89,11 @@ function redefine_attr_count()
   end
   nothing
 end
-
+@noinline function _redefine_num_threads()
+  @eval num_threads() = StaticInt{$(Threads.nthreads())}()
+end
 function redefine_num_threads()
-  if Int(num_threads()) > min(Threads.nthreads(),Int(sys_threads()))
-    @eval num_threads() = StaticInt{$(Threads.nthreads())}()
-  end  
+  Int(num_threads()) > min(Threads.nthreads(),Int(sys_threads())) && _redefine_num_threads()
 end
 
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
