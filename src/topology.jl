@@ -28,13 +28,24 @@ function count_attr(topology::Hwloc.Object, attr::Symbol)
   end
   count
 end
-
 function count_attr(attr::Symbol)
   topology = TOPOLOGY.topology
   topology === nothing && return nothing
   count_attr(topology, attr)
 end
 
+@static if Sys.isapple() && Sys.ARCH === :aarch64 # detect M1
+redefine_attr_count() = nothing
+redefine_num_threads() = nothing
+num_l1cache() = static(4)
+num_l2cache() = static(1)
+num_l3cache() = static(0)
+num_l4cache() = static(0)
+num_machines() = static(1)
+num_sockets() = static(1)
+num_cores() = static(4)
+sys_threads() = static(4)
+else # not M1
 @noinline function define_attr_count(fname::Symbol, v)
   if v === nothing
     @eval $fname() = nothing
@@ -95,6 +106,7 @@ end
 function redefine_num_threads()
   Int(num_threads()) > min(Threads.nthreads(),Int(sys_threads())) && _redefine_num_threads()
 end
+end # not M1
 
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
 num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
@@ -185,6 +197,23 @@ cache_linesize(_) = StaticInt{64}() # assume...
 cache_associativity(_) = nothing
 cache_type(_) = nothing
 cache_inclusive(_) = nothing
+
+unwrap(::Val{S}) where {S} = S
+@static if Sys.isapple() && Sys.ARCH === :aarch64
+redefine_cache(_) = nothing
+cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{131072}()
+cache_linesize(::Union{Val{1},StaticInt{1}}) = StaticInt{128}()
+cache_associativity(::Union{Val{1},StaticInt{1}}) = StaticInt{0}()
+cache_type(::Union{Val{1},StaticInt{1}}) = Val{:Data}()
+cache_inclusive(::Union{Val{1},StaticInt{1}}) = False()
+
+cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{12582912}()
+cache_linesize(::Union{Val{2},StaticInt{2}}) = StaticInt{128}()
+cache_associativity(::Union{Val{2},StaticInt{2}}) = StaticInt{0}()
+cache_type(::Union{Val{2},StaticInt{2}}) = Val{:Unified}()
+cache_inclusive(::Union{Val{2},StaticInt{2}}) = False()
+
+else # not M1
 function define_cache(N, c = dynamic_cache_summary(N))
   c === nothing_cache_summary() || _define_cache(N, c)
 end
@@ -198,8 +227,6 @@ end
   end
   nothing
 end
-
-unwrap(::Val{S}) where {S} = S
 function redefine_cache(N)
   s = cache_size(StaticInt(N))
   l = cache_linesize(StaticInt(N))
@@ -221,5 +248,6 @@ function redefine_cache(N)
   nothing
 end
 foreach(define_cache, 1:4)
+end
 
 cache_linesize() = cache_linesize(Val(1))
