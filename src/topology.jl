@@ -36,7 +36,6 @@ end
 
 @static if Sys.isapple() && Sys.ARCH === :aarch64 # detect M1
 redefine_attr_count() = nothing
-redefine_num_threads() = nothing
 num_l1cache() = static(4)
 num_l2cache() = static(1)
 num_l3cache() = static(0)
@@ -45,6 +44,7 @@ num_machines() = static(1)
 num_sockets() = static(1)
 num_cores() = static(4)
 sys_threads() = static(4)
+num_threads() = static(4)
 else # not M1
 @noinline function define_attr_count(fname::Symbol, v)
   if v === nothing
