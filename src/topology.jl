@@ -223,7 +223,7 @@ end
     cache_linesize(::Union{Val{$N},StaticInt{$N}}) = StaticInt{$(c.linesize)}()
     cache_associativity(::Union{Val{$N},StaticInt{$N}}) = StaticInt{$(c.associativity)}()
     cache_type(::Union{Val{$N},StaticInt{$N}}) = Val{$(c.type === nothing ? nothing : QuoteNode(c.type))}()
-    cache_inclusive(::Union{Val{$N},StaticInt{$N}}) = $(c.inclusive ? :True : :False)()
+    cache_inclusive(::Union{Val{$N},StaticInt{$N}}) = $(c.inclusive isa Bool && c.inclusive ? :True : :False)()
   end
   nothing
 end
