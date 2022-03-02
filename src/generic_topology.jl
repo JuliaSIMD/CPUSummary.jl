@@ -62,11 +62,5 @@ cache_linesize(::Union{Val{3},StaticInt{3}}) = StaticInt{64}()
 cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
 cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 
-num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
-num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
-num_cache(::Union{Val{3},StaticInt{3}}) = num_l3cache()
-num_cache(::Union{Val{4},StaticInt{4}}) = num_l4cache()
-const BASELINE_CORES = Int(num_cores()) * ((Sys.ARCH === :aarch64) && Sys.isapple() ? 2 : 1)
-
 __init__() = _redefine()
 
