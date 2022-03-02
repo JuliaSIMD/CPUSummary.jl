@@ -110,28 +110,6 @@ function redefine_num_threads()
 end
 end # not M1
 
-function num_cache_levels()
-  numl4 = num_l4cache()
-  numl4 === nothing && return nothing
-  ifelse(
-    eq(numl4, Zero()),
-    ifelse(
-      eq(num_l3cache(), Zero()),
-      ifelse(
-        eq(num_l2cache(), Zero()),
-        ifelse(
-          eq(num_l1cache(), Zero()),
-          Zero(),
-          One()
-        ),
-        StaticInt{2}()
-      ),
-      StaticInt{3}()
-    ),
-    StaticInt{4}()
-  )
-end
-
 function dynamic_cache_inclusivity()::NTuple{4,Bool}
   @static if !((Sys.ARCH === :x86_64) || (Sys.ARCH === :i686))
     return (false,false,false,false)
