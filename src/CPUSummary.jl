@@ -14,7 +14,6 @@ use_hwloc(b) = @set_preferences!("hwloc" => b)
     p = run(`$(Base.julia_cmd()) --project=$(mktempdir()) -e'using Pkg; Pkg.add("Hwloc"); using Hwloc; Hwloc.gettopology()'`, wait=false)
     wait(p)
     if p.exitcode == 0 && p.termsignal == 0
-      using Hwloc
       include("topology.jl")
     else
       use_hwloc(false)
