@@ -1,5 +1,4 @@
 
-redefine_attr_count() = nothing
 num_machines() = static(1)
 num_sockets() = static(1)
 
