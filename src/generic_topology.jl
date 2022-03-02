@@ -3,24 +3,6 @@ redefine_attr_count() = nothing
 num_machines() = static(1)
 num_sockets() = static(1)
 
-function _redefine()
-  nc = (Sys.CPU_THREADS)::Int>>1
-  syst = Sys.CPU_THREADS::Int
-  nt = Threads.nthreads()
-  if nc != num_l1cache()
-    @eval num_l1cache() = static($nc)
-  end
-  if nc != num_cores()
-    @eval num_cores() = static($nc)
-  end
-  if syst != sys_threads()
-    @eval sys_threads() = static($syst)
-  end
-  if nt != num_threads()
-    @eval num_threads() = static($nt)
-  end
-end
-
 let nc = static((Sys.CPU_THREADS)::Int>>1)
   global num_l1cache() = nc
   global num_cores() = nc
@@ -62,5 +44,22 @@ cache_linesize(::Union{Val{3},StaticInt{3}}) = StaticInt{64}()
 cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
 cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 
-__init__() = _redefine()
+function __init__()
+  ccall(:jl_generating_output, Cint, ()) == 1 && return
+  nc = (Sys.CPU_THREADS)::Int>>1
+  syst = Sys.CPU_THREADS::Int
+  nt = Threads.nthreads()
+  if nc != num_l1cache()
+    @eval num_l1cache() = static($nc)
+  end
+  if nc != num_cores()
+    @eval num_cores() = static($nc)
+  end
+  if syst != sys_threads()
+    @eval sys_threads() = static($syst)
+  end
+  if nt != num_threads()
+    @eval num_threads() = static($nt)
+  end
+end
 
