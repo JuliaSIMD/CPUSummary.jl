@@ -20,7 +20,6 @@ if Sys.CPU_NAME === "tigerlake"
 else
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{32768}()
 end
-cache_linesize(::Union{Val{1},StaticInt{1}}) = StaticInt{64}()
 cache_associativity(::Union{Val{1},StaticInt{1}}) = StaticInt{0}()
 cache_type(::Union{Val{1},StaticInt{1}}) = Val{:Data}()
 cache_inclusive(::Union{Val{1},StaticInt{1}}) = False()
@@ -34,11 +33,15 @@ elseif occursin("zn", Sys.CPU_NAME) || occursin("icelake", Sys.CPU_NAME)
 else
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{262144}()
 end
-cache_linesize(::Union{Val{2},StaticInt{2}}) = StaticInt{64}()
 cache_associativity(::Union{Val{2},StaticInt{2}}) = StaticInt{0}()
 cache_type(::Union{Val{2},StaticInt{2}}) = Val{:Unified}()
 cache_inclusive(_) = False()
-cache_linesize(::Union{Val{3},StaticInt{3}}) = StaticInt{64}()
+@static if Sys.isapple() && Sys.ARCH === :aarch64
+  cache_linesize(_) = StaticInt{128}() # assume...
+else
+  cache_linesize(_) = StaticInt{64}() # assume...
+end
+
 
 cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
 cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()

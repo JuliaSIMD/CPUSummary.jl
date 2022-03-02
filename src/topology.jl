@@ -168,13 +168,13 @@ function dynamic_cache_summary(N)
   )
 end
 cache_size(_) = StaticInt{0}()
-cache_linesize(_) = StaticInt{64}() # assume...
 cache_associativity(_) = nothing
 cache_type(_) = nothing
 cache_inclusive(_) = nothing
 
 unwrap(::Val{S}) where {S} = S
 @static if Sys.isapple() && Sys.ARCH === :aarch64
+cache_linesize(_) = StaticInt{128}() # assume...
 redefine_cache(_) = nothing
 cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{131072}()
 cache_linesize(::Union{Val{1},StaticInt{1}}) = StaticInt{128}()
@@ -189,6 +189,7 @@ cache_type(::Union{Val{2},StaticInt{2}}) = Val{:Unified}()
 cache_inclusive(::Union{Val{2},StaticInt{2}}) = False()
 
 else # not M1
+cache_linesize(_) = StaticInt{64}() # assume...
 function define_cache(N, c = dynamic_cache_summary(N))
   c === nothing_cache_summary() || _define_cache(N, c)
 end
@@ -225,7 +226,6 @@ end
 foreach(define_cache, 1:4)
 end
 
-cache_linesize() = cache_linesize(Val(1))
 function __init__()
   Sys.isapple() && Sys.ARCH === :aarch64 && return # detect M1
   ccall(:jl_generating_output, Cint, ()) == 1 && return

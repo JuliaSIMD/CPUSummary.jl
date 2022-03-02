@@ -31,6 +31,7 @@ num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
 num_cache(::Union{Val{3},StaticInt{3}}) = num_l3cache()
 num_cache(::Union{Val{4},StaticInt{4}}) = num_l4cache()
 const BASELINE_CORES = Int(num_cores()) * ((Sys.ARCH === :aarch64) && Sys.isapple() ? 2 : 1)
+cache_linesize() = cache_linesize(Val(1))
 function num_cache_levels()
   numl4 = num_l4cache()
   numl4 === nothing && return nothing
