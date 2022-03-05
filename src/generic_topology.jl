@@ -15,7 +15,7 @@ num_l2cache() = num_l1cache()
 num_l3cache() = static(1)
 num_l4cache() = static(0)
 
-if Sys.CPU_NAME === "tigerlake"
+if Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake" || Sys.CPU_NAME === "icelake-server"
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{49152}()
 else
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{32768}()
@@ -26,7 +26,7 @@ cache_inclusive(::Union{Val{1},StaticInt{1}}) = False()
 
 if Sys.CPU_NAME === "skylake-avx512" || Sys.CPU_NAME === "cascadelake"
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{1048576}()
-elseif Sys.CPU_NAME === "tigerlake"
+elseif Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake-server"
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{1310720}()
 elseif occursin("zn", Sys.CPU_NAME) || occursin("icelake", Sys.CPU_NAME)
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{524288}()
