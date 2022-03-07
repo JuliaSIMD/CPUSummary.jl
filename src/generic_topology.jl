@@ -41,7 +41,7 @@ cache_inclusive(_) = False()
 else
   cache_linesize(_) = StaticInt{64}() # assume...
 end
-
+cache_size(_) = StaticInt{0}()
 
 cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
 cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
