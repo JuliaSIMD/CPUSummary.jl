@@ -6,7 +6,7 @@ using IfElse: ifelse
 export cache_size, cache_linesize, cache_associativity, cache_type,
   cache_inclusive, num_cache, num_cores, num_threads
 
-const USE_HWLOC = @load_preference("hwloc", true)
+const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isapple())
 use_hwloc(b) = @set_preferences!("hwloc" => b)
 
 @static if USE_HWLOC

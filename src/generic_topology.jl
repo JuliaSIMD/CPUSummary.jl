@@ -2,7 +2,11 @@
 num_machines() = static(1)
 num_sockets() = static(1)
 
-let nc = static((Sys.CPU_THREADS)::Int>>1)
+function _get_num_threads()
+  static((Sys.CPU_THREADS)::Int >> (Sys.ARCH !== :aarch64))
+end
+
+let nc = _get_num_threads()
   global num_l1cache() = nc
   global num_cores() = nc
 end
@@ -10,13 +14,19 @@ let syst = static((Sys.CPU_THREADS)::Int)
   global sys_threads() = syst
   global num_threads() = syst
 end
-
+@static if Sys.ARCH === :aarch64
+num_l2cache() = static(1)
+num_l3cache() = static(0)
+else
 num_l2cache() = num_l1cache()
 num_l3cache() = static(1)
+end
 num_l4cache() = static(0)
 
 if Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake" || Sys.CPU_NAME === "icelake-server"
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{49152}()
+elseif Sys.ARCH === :aarch64 && Sys.isapple()
+  cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{131072}()
 else
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{32768}()
 end
@@ -30,6 +40,8 @@ elseif Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake-server"
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{1310720}()
 elseif occursin("zn", Sys.CPU_NAME) || occursin("icelake", Sys.CPU_NAME)
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{524288}()
+elseif Sys.ARCH === :aarch64 && Sys.isapple()
+  cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{12582912}()
 else
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{262144}()
 end
@@ -48,7 +60,7 @@ cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 
 function __init__()
   ccall(:jl_generating_output, Cint, ()) == 1 && return
-  nc = (Sys.CPU_THREADS)::Int>>1
+  nc = _get_num_threads()
   syst = Sys.CPU_THREADS::Int
   nt = Threads.nthreads()
   if nc != num_l1cache()
