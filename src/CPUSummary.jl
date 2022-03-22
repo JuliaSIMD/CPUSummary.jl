@@ -11,7 +11,11 @@ use_hwloc(b) = @set_preferences!("hwloc" => b)
 
 @static if USE_HWLOC
   try
-    p = run(`$(Base.julia_cmd()) --project=$(Base.active_project()) -e'using Hwloc; Hwloc.gettopology()'`, wait=false)
+    script = """
+    $(Base.load_path_setup_code())
+    using Hwloc; Hwloc.gettopology()
+    """
+    p = run(`$(Base.julia_cmd()) -e $(script)`, wait=false)
     wait(p)
     if p.exitcode == 0 && p.termsignal == 0
       include("topology.jl")
