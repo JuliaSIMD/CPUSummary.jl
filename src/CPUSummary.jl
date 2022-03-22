@@ -13,7 +13,8 @@ use_hwloc(b) = @set_preferences!("hwloc" => b)
   try
     script = """
     $(Base.load_path_setup_code())
-    using Hwloc; Hwloc.gettopology()
+    Hwloc = Base.require(Base.PkgId(Base.UUID("0e44f5e4-bd66-52a0-8798-143a42290a1d"), "Hwloc"))
+    Hwloc.gettopology()
     """
     p = run(`$(Base.julia_cmd()) -e $(script)`, wait=false)
     wait(p)
