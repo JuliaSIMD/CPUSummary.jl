@@ -10,9 +10,8 @@ const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isappl
 use_hwloc(b) = @set_preferences!("hwloc" => b)
 
 @static if USE_HWLOC
-  tmpd = mktempdir()
   try
-    p = run(`$(Base.julia_cmd()) --project=$tmpd -e'using Pkg; Pkg.add("Hwloc"); using Hwloc; Hwloc.gettopology()'`, wait=false)
+    p = run(`$(Base.julia_cmd()) --project=$(Base.active_project()) -e'using Hwloc; Hwloc.gettopology()'`, wait=false)
     wait(p)
     if p.exitcode == 0 && p.termsignal == 0
       include("topology.jl")
@@ -23,8 +22,6 @@ use_hwloc(b) = @set_preferences!("hwloc" => b)
   catch
     use_hwloc(false)
     include("generic_topology.jl")
-  finally
-    rm(tmpd, recursive=true)
   end
 else
   include("generic_topology.jl")

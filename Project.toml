@@ -1,7 +1,7 @@
 name = "CPUSummary"
 uuid = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
 authors = ["chriselrod <elrodc@gmail.com> and contributors"]
-version = "0.1.15"
+version = "0.1.16"
 
 [deps]
 Hwloc = "0e44f5e4-bd66-52a0-8798-143a42290a1d"
