@@ -1,36 +1,36 @@
 module CPUSummary
 
-using Preferences, Static
+using Static
 using Static: Zero, One, gt, lt
 using IfElse: ifelse
 export cache_size, cache_linesize, cache_associativity, cache_type,
   cache_inclusive, num_cache, num_cores, num_threads
 
-const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isapple())
-use_hwloc(b) = @set_preferences!("hwloc" => b)
+# const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isapple())
+# use_hwloc(b) = @set_preferences!("hwloc" => b)
 
-@static if USE_HWLOC
-  try
-    script = """
-    $(Base.load_path_setup_code())
-    Hwloc = Base.require(Base.PkgId(Base.UUID("0e44f5e4-bd66-52a0-8798-143a42290a1d"), "Hwloc"))
-    Hwloc.gettopology()
-    """
-    p = run(`$(Base.julia_cmd()) -e $(script)`, wait=false)
-    wait(p)
-    if p.exitcode == 0 && p.termsignal == 0
-      include("topology.jl")
-    else
-      use_hwloc(false)
-      include("generic_topology.jl")
-    end
-  catch
-    use_hwloc(false)
-    include("generic_topology.jl")
-  end
-else
+# @static if USE_HWLOC
+#   try
+#     script = """
+#     $(Base.load_path_setup_code())
+#     Hwloc = Base.require(Base.PkgId(Base.UUID("0e44f5e4-bd66-52a0-8798-143a42290a1d"), "Hwloc"))
+#     Hwloc.gettopology()
+#     """
+#     p = run(`$(Base.julia_cmd()) -e $(script)`, wait=false)
+#     wait(p)
+#     if p.exitcode == 0 && p.termsignal == 0
+#       include("topology.jl")
+#     else
+#       use_hwloc(false)
+#       include("generic_topology.jl")
+#     end
+#   catch
+#     use_hwloc(false)
+#     include("generic_topology.jl")
+#   end
+# else
   include("generic_topology.jl")
-end
+# end
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
 num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
 num_cache(::Union{Val{3},StaticInt{3}}) = num_l3cache()
