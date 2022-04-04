@@ -3,8 +3,14 @@ module CPUSummary
 using Static
 using Static: Zero, One, gt, lt
 using IfElse: ifelse
-export cache_size, cache_linesize, cache_associativity, cache_type,
-  cache_inclusive, num_cache, num_cores, num_threads
+export cache_size,
+  cache_linesize,
+  cache_associativity,
+  cache_type,
+  cache_inclusive,
+  num_cache,
+  num_cores,
+  num_threads
 
 # const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isapple())
 # use_hwloc(b) = @set_preferences!("hwloc" => b)
@@ -29,7 +35,7 @@ export cache_size, cache_linesize, cache_associativity, cache_type,
 #     include("generic_topology.jl")
 #   end
 # else
-  include("generic_topology.jl")
+include("generic_topology.jl")
 # end
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
 num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
@@ -46,16 +52,12 @@ function num_cache_levels()
       eq(num_l3cache(), Zero()),
       ifelse(
         eq(num_l2cache(), Zero()),
-        ifelse(
-          eq(num_l1cache(), Zero()),
-          Zero(),
-          One()
-        ),
-        StaticInt{2}()
+        ifelse(eq(num_l1cache(), Zero()), Zero(), One()),
+        StaticInt{2}(),
       ),
-      StaticInt{3}()
+      StaticInt{3}(),
     ),
-    StaticInt{4}()
+    StaticInt{4}(),
   )
 end
 

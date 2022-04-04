@@ -15,15 +15,18 @@ let syst = static((Sys.CPU_THREADS)::Int)
   global num_threads() = syst
 end
 @static if Sys.ARCH === :aarch64
-num_l2cache() = static(1)
-num_l3cache() = static(0)
+  num_l2cache() = static(1)
+  num_l3cache() = static(0)
 else
-num_l2cache() = num_l1cache()
-num_l3cache() = static(1)
+  num_l2cache() = num_l1cache()
+  num_l3cache() = static(1)
 end
 num_l4cache() = static(0)
 
-if Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake" || Sys.CPU_NAME === "icelake-server" || Sys.CPU_NAME === "alderlake"
+if Sys.CPU_NAME === "tigerlake" ||
+   Sys.CPU_NAME === "icelake" ||
+   Sys.CPU_NAME === "icelake-server" ||
+   Sys.CPU_NAME === "alderlake"
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{49152}()
 elseif Sys.ARCH === :aarch64 && Sys.isapple()
   cache_size(::Union{Val{1},StaticInt{1}}) = StaticInt{131072}()
@@ -36,7 +39,9 @@ cache_inclusive(::Union{Val{1},StaticInt{1}}) = False()
 
 if Sys.CPU_NAME === "skylake-avx512" || Sys.CPU_NAME === "cascadelake"
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{1048576}()
-elseif Sys.CPU_NAME === "tigerlake" || Sys.CPU_NAME === "icelake-server" || Sys.CPU_NAME === "alderlake"
+elseif Sys.CPU_NAME === "tigerlake" ||
+       Sys.CPU_NAME === "icelake-server" ||
+       Sys.CPU_NAME === "alderlake"
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{1310720}()
 elseif occursin("zn", Sys.CPU_NAME) || occursin("icelake", Sys.CPU_NAME)
   cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{524288}()
@@ -76,4 +81,3 @@ function __init__()
     @eval num_threads() = static($nt)
   end
 end
-
