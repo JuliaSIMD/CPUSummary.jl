@@ -35,7 +35,31 @@ export cache_size,
 #     include("generic_topology.jl")
 #   end
 # else
-include("generic_topology.jl")
+@static if (Sys.ARCH === :x86_64) || (Sys.ARCH === :i686)
+  include("x86.jl")
+else
+  include("generic_topology.jl")
+end
+function __init__()
+  ccall(:jl_generating_output, Cint, ()) == 1 && return
+  nc = _get_num_cores()
+  syst = Sys.CPU_THREADS::Int
+  nt = Threads.nthreads()
+  if nc != num_l1cache()
+    @eval num_l1cache() = static($nc)
+  end
+  if nc != num_cores()
+    @eval num_cores() = static($nc)
+  end
+  if syst != sys_threads()
+    @eval sys_threads() = static($syst)
+  end
+  if nt != num_threads()
+    @eval num_threads() = static($nt)
+  end
+end
+
+
 # end
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
 num_cache(::Union{Val{2},StaticInt{2}}) = num_l2cache()
