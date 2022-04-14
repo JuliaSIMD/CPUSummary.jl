@@ -57,6 +57,7 @@ function __init__()
   if nt != num_threads()
     @eval num_threads() = static($nt)
   end
+  _extra_init()
 end
 
 
