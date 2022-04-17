@@ -26,12 +26,22 @@ else
 end
 num_l4cache() = static(0)
 
-for i = 1:4
-  @eval begin
-    cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(CpuId.cachesize(i)))
-    cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(CpuId.cacheinclusive(i)!=0))
+const PrecompiledCacheSize = CpuId.cachesize()
+const PrecompiledCacheInclusive = CpuId.cacheinclusive()
+cache_size(_) = static(0)
+cache_inclusive(_) = False()
+@noinline function _eval_cache_size(cachesize)
+  for (i, csi) in enumerate(cachesize)
+    @eval cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(csi))
   end
 end
+@noinline function _eval_cache_inclusive(cacheinclusive)
+  for (i, cii) in enumerate(cacheinclusive)
+    @eval cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(cii != 0))
+  end
+end
+_eval_cache_size(PrecompiledCacheSize)
+_eval_cache_inclusive(PrecompiledCacheInclusive)
 # TODO: implement
 cache_associativity(_) = static(0)
 
@@ -50,8 +60,12 @@ function _extra_init()
   nc = _get_num_cores()
   if (nc != CpuId.cpucores())
     cache_l3_per_core = CpuId.cachesize(3) ÷ max(CpuId.cpucores(), 1)
-    @eval cache_size(::Union{Val{3},StaticInt{3}}) = $(static(cache_l3_per_core*nc))
+    @eval cache_size(::Union{Val{3},StaticInt{3}}) = $(static(cache_l3_per_core * nc))
   end
+  cs = CpuId.cachesize()
+  cs === PrecompiledCacheSize || _eval_cache_size(cs)
+  ci = CpuId.cacheinclusive()
+  ci === PrecompiledCacheInclusive || _eval_cache_inclusive(ci)
 end
 
 
