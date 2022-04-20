@@ -28,7 +28,6 @@ num_l4cache() = static(0)
 
 const PrecompiledCacheSize = CpuId.cachesize()
 const PrecompiledCacheInclusive = CpuId.cacheinclusive()
-cache_size(_) = static(0)
 cache_inclusive(_) = False()
 @noinline function _eval_cache_size(cachesize)
   for (i, csi) in enumerate(cachesize)
