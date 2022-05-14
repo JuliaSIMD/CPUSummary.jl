@@ -35,7 +35,7 @@ export cache_size,
 #     include("generic_topology.jl")
 #   end
 # else
-@static if (Sys.ARCH === :x86_64) || (Sys.ARCH === :i686)
+if (Sys.ARCH === :x86_64)
   include("x86.jl")
 else
   include("generic_topology.jl")
