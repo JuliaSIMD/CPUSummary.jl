@@ -7,7 +7,7 @@ function _get_num_threads()::Int
   (Sys.CPU_THREADS)::Int >> (Sys.ARCH !== :aarch64)
 end
 
-_get_num_cores()::Int = clamp(CpuId.cpucores_total(), 1, (Sys.CPU_THREADS)::Int)
+_get_num_cores()::Int = clamp(CpuId.cpucores(), 1, (Sys.CPU_THREADS)::Int)
 
 let nc = static(_get_num_cores())
   global num_l1cache() = nc
@@ -57,7 +57,7 @@ cache_size(_) = StaticInt{0}()
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
   nc = _get_num_cores()
-  if (nc != CpuId.cpucores_total())
+  if (nc != CpuId.cpucores())
     cache_l3_per_core = CpuId.cachesize(3) ÷ max(CpuId.cpucores(), 1)
     @eval cache_size(::Union{Val{3},StaticInt{3}}) = $(static(cache_l3_per_core * nc))
   end
