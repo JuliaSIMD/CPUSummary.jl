@@ -1,7 +1,7 @@
 name = "CPUSummary"
 uuid = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
 authors = ["chriselrod <elrodc@gmail.com> and contributors"]
-version = "0.1.25"
+version = "0.1.26"
 
 [deps]
 CpuId = "adafc99b-e345-5852-983c-f28acb93d879"

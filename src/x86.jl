@@ -26,7 +26,7 @@ else
 end
 num_l4cache() = static(0)
 
-const PrecompiledCacheSize = CpuId.cachesize()
+const PrecompiledCacheSize = CpuId.cachesize() .÷ (1, 1, CpuId.cpucores())
 const PrecompiledCacheInclusive = CpuId.cacheinclusive()
 cache_inclusive(_) = False()
 @noinline function _eval_cache_size(cachesize)
@@ -56,12 +56,7 @@ cache_size(_) = StaticInt{0}()
 
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
-  nc = _get_num_cores()
-  if (nc != CpuId.cpucores())
-    cache_l3_per_core = CpuId.cachesize(3) ÷ max(CpuId.cpucores(), 1)
-    @eval cache_size(::Union{Val{3},StaticInt{3}}) = $(static(cache_l3_per_core * nc))
-  end
-  cs = CpuId.cachesize()
+  cs = CpuId.cachesize() .÷ (1, 1, CpuId.cpucores())
   cs === PrecompiledCacheSize || _eval_cache_size(cs)
   ci = CpuId.cacheinclusive()
   ci === PrecompiledCacheInclusive || _eval_cache_inclusive(ci)

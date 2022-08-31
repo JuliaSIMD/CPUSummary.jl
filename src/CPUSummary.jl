@@ -35,6 +35,13 @@ export cache_size,
 #     include("generic_topology.jl")
 #   end
 # else
+"""
+    cache_size(::Val{N})
+
+Returns the cache size per core of the `N`th cache
+"""
+function cache_size end
+
 if (Sys.ARCH === :x86_64)
   include("x86.jl")
 else
