@@ -35,9 +35,9 @@ cache_type(::Union{Val{1},StaticInt{1}}) = Val{:Data}()
 cache_inclusive(::Union{Val{1},StaticInt{1}}) = False()
 
 if Sys.ARCH === :aarch64 && Sys.isapple()
-  cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{12582912}()
+  cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{3145728}()
 else
-  cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{262144}()
+  cache_size(::Union{Val{2},StaticInt{2}}) = StaticInt{65536}()
 end
 cache_associativity(::Union{Val{2},StaticInt{2}}) = StaticInt{0}()
 cache_type(::Union{Val{2},StaticInt{2}}) = Val{:Unified}()
@@ -50,6 +50,6 @@ end
 cache_size(_) = StaticInt{0}()
 
 cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
-cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
+cache_size(::Union{Val{3},StaticInt{3}}) = StaticInt{1441792}()
 
 _extra_init() = nothing
