@@ -26,7 +26,9 @@ else
 end
 num_l4cache() = static(0)
 
-const PrecompiledCacheSize = CpuId.cachesize() .÷ (1, 1, CpuId.cpucores())
+const PrecompiledCacheSize = let cs = CpuId.cachesize()
+  ntuple(i -> i == 3 ? cs[3] ÷ CpuId.cpucores() : cs[i], length(cs))
+end
 const PrecompiledCacheInclusive = CpuId.cacheinclusive()
 cache_inclusive(_) = False()
 @noinline function _eval_cache_size(cachesize)
@@ -56,7 +58,9 @@ cache_size(_) = StaticInt{0}()
 
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
-  cs = CpuId.cachesize() .÷ (1, 1, CpuId.cpucores())
+  cs = let cs=CpuId.cachesize()
+    ntuple(i -> i == 3 ? cs[3] ÷ CpuId.cpucores() : cs[i], length(cs))
+  end
   cs === PrecompiledCacheSize || _eval_cache_size(cs)
   ci = CpuId.cacheinclusive()
   ci === PrecompiledCacheInclusive || _eval_cache_inclusive(ci)
