@@ -27,7 +27,7 @@ end
 num_l4cache() = static(0)
 
 const PrecompiledCacheSize = let cs = CpuId.cachesize()
-  ntuple(i -> i == 3 ? cs[3] ÷ CpuId.cpucores() : cs[i], length(cs))
+  ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
 end
 const PrecompiledCacheInclusive = CpuId.cacheinclusive()
 cache_inclusive(_) = False()
