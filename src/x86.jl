@@ -59,7 +59,7 @@ cache_size(_) = StaticInt{0}()
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
   cs = let cs=CpuId.cachesize()
-    ntuple(i -> i == 3 ? cs[3] ÷ CpuId.cpucores() : cs[i], length(cs))
+    ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
   end
   cs === PrecompiledCacheSize || _eval_cache_size(cs)
   ci = CpuId.cacheinclusive()
