@@ -43,7 +43,7 @@ Returns the cache size per core of the `N`th cache
 function cache_size end
 
 function get_cpu_threads()::Int
-  if @isdefined(Sys.CPU_THREADS)
+  if isdefined(Sys, :CPU_THREADS)
     return Sys.CPU_THREADS
   else
     return Int(ccall(:jl_cpu_threads, Int32, ()))::Int
