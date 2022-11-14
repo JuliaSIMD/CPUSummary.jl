@@ -3,7 +3,7 @@ num_machines() = static(1)
 num_sockets() = static(1)
 
 function _get_num_threads()::Int
-  (Sys.CPU_THREADS)::Int >> (Sys.ARCH !== :aarch64)
+  (get_cpu_threads())::Int >> (Sys.ARCH !== :aarch64)
 end
 
 const _get_num_cores = _get_num_threads  
@@ -12,7 +12,7 @@ let nc = static(_get_num_threads())
   global num_l1cache() = nc
   global num_cores() = nc
 end
-let syst = static((Sys.CPU_THREADS)::Int)
+let syst = static((get_cpu_threads())::Int)
   global sys_threads() = syst
   global num_threads() = syst
 end
