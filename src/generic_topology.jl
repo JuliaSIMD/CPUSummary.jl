@@ -2,6 +2,8 @@
 num_machines() = static(1)
 num_sockets() = static(1)
 
+_get_num_cores() = (get_cpu_threads())::Int >> (Sys.ARCH !== :aarch64)
+
 let syst = static(get_cpu_threads()), nc = static(syst >> (Sys.ARCH !== :aarch64))
   global num_l1cache() = nc
   global num_cores() = nc
