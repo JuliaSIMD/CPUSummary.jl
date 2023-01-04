@@ -2,19 +2,10 @@
 num_machines() = static(1)
 num_sockets() = static(1)
 
-function _get_num_threads()::Int
-  (get_cpu_threads())::Int >> (Sys.ARCH !== :aarch64)
-end
-
-const _get_num_cores = _get_num_threads  
-
-let nc = static(_get_num_threads())
+let syst = static(get_cpu_threads()), nc = static(syst >> (Sys.ARCH !== :aarch64))
   global num_l1cache() = nc
   global num_cores() = nc
-end
-let syst = static((get_cpu_threads())::Int)
   global sys_threads() = syst
-  global num_threads() = syst
 end
 @static if Sys.ARCH === :aarch64
   num_l2cache() = static(1)

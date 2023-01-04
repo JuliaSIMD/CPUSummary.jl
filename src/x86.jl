@@ -3,10 +3,6 @@ using CpuId
 num_machines() = static(1)
 num_sockets() = static(1)
 
-function _get_num_threads()::Int
-  (get_cpu_threads())::Int >> (Sys.ARCH !== :aarch64)
-end
-
 _get_num_cores()::Int = clamp(CpuId.cpucores(), 1, (get_cpu_threads())::Int)
 
 let nc = static(_get_num_cores())
@@ -15,15 +11,9 @@ let nc = static(_get_num_cores())
 end
 let syst = static((get_cpu_threads())::Int)
   global sys_threads() = syst
-  global num_threads() = syst
 end
-@static if Sys.ARCH === :aarch64
-  num_l2cache() = static(1)
-  num_l3cache() = static(0)
-else
-  num_l2cache() = num_l1cache()
-  num_l3cache() = static(1)
-end
+num_l2cache() = num_l1cache()
+num_l3cache() = static(1)
 num_l4cache() = static(0)
 
 const PrecompiledCacheSize = let cs = CpuId.cachesize()
@@ -55,15 +45,14 @@ let lnsize = static(CpuId.cachelinesize())
 end
 cache_size(_) = StaticInt{0}()
 
-
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
-  cs = let cs=CpuId.cachesize()
+  cs = let cs = CpuId.cachesize()
     ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
   end
-  cs === PrecompiledCacheSize || _eval_cache_size(cs)
+  cs !== PrecompiledCacheSize && _eval_cache_size(cs)
   ci = CpuId.cacheinclusive()
-  ci === PrecompiledCacheInclusive || _eval_cache_inclusive(ci)
+  ci !== PrecompiledCacheInclusive && _eval_cache_inclusive(ci)
 end
 
 

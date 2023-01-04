@@ -46,7 +46,6 @@ end
   num_sockets() = static(1)
   num_cores() = static(4)
   sys_threads() = static(4)
-  num_threads() = static(4)
 else # not M1
   @noinline function define_attr_count(fname::Symbol, v)
     if v === nothing
@@ -76,7 +75,6 @@ else # not M1
     (:num_sockets, :Package),
     (:num_cores, :Core),
     (:sys_threads, :PU),
-    (:num_threads, :PU),
   ]
     define_attr_count(f, count_attr(attr))
   end
@@ -101,13 +99,6 @@ else # not M1
       end
     end
     nothing
-  end
-  @noinline function _redefine_num_threads()
-    @eval num_threads() = StaticInt{$(Threads.nthreads())}()
-  end
-  function redefine_num_threads()
-    Int(num_threads()) > min(Threads.nthreads(), Int(sys_threads())) &&
-      _redefine_num_threads()
   end
 end # not M1
 
@@ -241,6 +232,5 @@ function __init__()
     redefine_attr_count()
     foreach(redefine_cache, 1:4)
   end
-  redefine_num_threads()
   return nothing
 end

@@ -4,13 +4,7 @@ using Static
 using Static: Zero, One, gt, lt
 using IfElse: ifelse
 export cache_size,
-  cache_linesize,
-  cache_associativity,
-  cache_type,
-  cache_inclusive,
-  num_cache,
-  num_cores,
-  num_threads
+  cache_linesize, cache_associativity, cache_type, cache_inclusive, num_cache, num_cores
 
 # const USE_HWLOC = @load_preference("hwloc", Sys.ARCH !== :aarch64 || !Sys.isapple())
 # use_hwloc(b) = @set_preferences!("hwloc" => b)
@@ -58,7 +52,6 @@ function __init__()
   ccall(:jl_generating_output, Cint, ()) == 1 && return
   nc = _get_num_cores()
   syst = Sys.CPU_THREADS::Int
-  nt = Threads.nthreads()
   if nc != num_l1cache()
     @eval num_l1cache() = static($nc)
   end
@@ -67,9 +60,6 @@ function __init__()
   end
   if syst != sys_threads()
     @eval sys_threads() = static($syst)
-  end
-  if nt != num_threads()
-    @eval num_threads() = static($nt)
   end
   _extra_init()
 end
