@@ -66,6 +66,7 @@ function __init__()
     @eval sys_threads() = static($syst)
   end
   _extra_init()
+  return nothing
 end
 
 
@@ -92,6 +93,11 @@ function num_cache_levels()
     ),
     StaticInt{4}(),
   )
+end
+
+# explicit precompilation only on Julia v1.9 and newer
+if VERSION >= v"1.9"
+  include("precompile.jl")
 end
 
 end

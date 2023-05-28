@@ -53,6 +53,7 @@ function _extra_init()
   cs !== PrecompiledCacheSize && _eval_cache_size(cs)
   ci = CpuId.cacheinclusive()
   ci !== PrecompiledCacheInclusive && _eval_cache_inclusive(ci)
+  return nothing
 end
 
 
