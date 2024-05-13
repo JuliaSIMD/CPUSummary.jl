@@ -6,5 +6,4 @@ using PrecompileTools: @compile_workload
   # However, it does not seem to be recognized correctly since we can
   # further reduce the time of `using CPUSummary` significantly by
   # precompiling it here in addition ot `__init__()`.
-  _extra_init()
 end
