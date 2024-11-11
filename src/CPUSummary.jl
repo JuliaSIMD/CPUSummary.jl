@@ -65,7 +65,7 @@ function __init__()
   if syst != sys_threads()
     @eval sys_threads() = static($syst)
   end
-  _extra_init()
+  # _extra_init()
   return nothing
 end
 
