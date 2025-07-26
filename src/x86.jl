@@ -35,10 +35,10 @@ const PrecompiledCacheInclusive = CpuId.cacheinclusive()
 # _eval_cache_inclusive(PrecompiledCacheInclusive)
 
 
-cache_size(::Val{S}) where S = cache_size(S)
-cache_size(::StaticInt{S}) where S = cache_size(S)
+cache_size(::Val{S}) where {S} = cache_size(S)
+cache_size(::StaticInt{S}) where {S} = cache_size(S)
 
-@generated function cache_size(cachesize)
+@inline @generated function cache_size(cachesize)
     cs = let cs = CpuId.cachesize()
         ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
     end
@@ -59,25 +59,25 @@ cache_size(::StaticInt{S}) where S = cache_size(S)
     end
 
 end
-cache_inclusive(::Val{S}) where S = cache_inclusive(S)
-cache_inclusive(::StaticInt{S}) where S = cache_inclusive(S)
+cache_inclusive(::Val{S}) where {S} = cache_inclusive(S)
+cache_inclusive(::StaticInt{S}) where {S} = cache_inclusive(S)
 
-@generated function cache_inclusive(cacheinclusive)
+@inline @generated function cache_inclusive(cacheinclusive)
     ci = CpuId.cacheinclusive()
 
     cache_inclusives = map(enumerate(ci)) do (i, cii)
-        val = cii != 0 
+        val = cii != 0
         return :(
             if cacheinclusive == $i
                 return static($val)
             end
-            )
-        end
-    
+        )
+    end
+
     if !isempty(cache_inclusives)
-        push!(cache_inclusives, :(return False() ))
+        push!(cache_inclusives, :(return False()))
     else
-        cache_inclusives = [:(return False())] 
+        cache_inclusives = [:(return False())]
     end
 
     return quote
@@ -87,9 +87,7 @@ cache_inclusive(::StaticInt{S}) where S = cache_inclusive(S)
     end
 
 
-
 end
-
 
 
 # TODO: implement
