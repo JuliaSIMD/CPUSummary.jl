@@ -5,13 +5,12 @@ num_sockets() = static(1)
 
 _get_num_cores()::Int = clamp(CpuId.cpucores(), 1, (get_cpu_threads())::Int)
 
-let nc = static(_get_num_cores())
-  global num_l1cache() = nc
-  global num_cores() = nc
-end
-let syst = static((get_cpu_threads())::Int)
-  global sys_threads() = syst
-end
+const nc = @load_preference("nc", _get_num_cores())
+const syst = @load_preference("syst", get_cpu_threads())
+
+num_l1cache() = static(nc)
+num_cores() = static(nc)
+sys_threads() = static(syst)
 num_l2cache() = num_l1cache()
 num_l3cache() = static(1)
 num_l4cache() = static(0)
