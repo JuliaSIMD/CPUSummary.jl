@@ -7,6 +7,7 @@ end
 using Static
 using Static: Zero, One, gt, lt
 using IfElse: ifelse
+using Preferences
 export cache_size,
   cache_linesize, cache_associativity, cache_type, cache_inclusive, num_cache, num_cores
 
@@ -52,18 +53,23 @@ if (Sys.ARCH === :x86_64)
 else
   include("generic_topology.jl")
 end
+# Load preferences at compile time with exact same names as __init__
+const nc = @load_preference("nc", nothing)
+const syst = @load_preference("syst", nothing)
+
 function __init__()
   ccall(:jl_generating_output, Cint, ()) == 1 && return
-  nc = _get_num_cores()
-  syst = Sys.CPU_THREADS::Int
-  if nc != num_l1cache()
-    @eval num_l1cache() = static($nc)
+  # Use preferences if set, otherwise detect at runtime
+  actual_nc = nc === nothing ? _get_num_cores() : nc
+  actual_syst = syst === nothing ? Sys.CPU_THREADS::Int : syst
+  if actual_nc != num_l1cache()
+    @eval num_l1cache() = static($actual_nc)
   end
-  if nc != num_cores()
-    @eval num_cores() = static($nc)
+  if actual_nc != num_cores()
+    @eval num_cores() = static($actual_nc)
   end
-  if syst != sys_threads()
-    @eval sys_threads() = static($syst)
+  if actual_syst != sys_threads()
+    @eval sys_threads() = static($actual_syst)
   end
   _extra_init()
   return nothing
