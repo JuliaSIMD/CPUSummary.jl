@@ -48,18 +48,12 @@ function get_cpu_threads()::Int
     return Int(ccall(:jl_cpu_threads, Int32, ()))::Int
   end
 end
-if (Sys.ARCH === :x86_64)
+
+@static if (Sys.ARCH === :x86_64)
   include("x86.jl")
 else
   include("generic_topology.jl")
 end
-
-
-const nc = @load_preference("nc", _get_num_cores())
-const syst = @load_preference("syst", Sys.CPU_THREADS::Int)
-num_l1cache() = static(nc)
-num_cores() = static(nc)
-sys_threads() = static(syst)
 
 # end
 num_cache(::Union{Val{1},StaticInt{1}}) = num_l1cache()
@@ -86,9 +80,6 @@ function num_cache_levels()
   )
 end
 
-# explicit precompilation only on Julia v1.9 and newer
-if VERSION >= v"1.9"
-  include("precompile.jl")
-end
+include("precompile.jl")
 
 end
