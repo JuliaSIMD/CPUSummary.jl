@@ -2,13 +2,14 @@
 num_machines() = static(1)
 num_sockets() = static(1)
 
-_get_num_cores() = (get_cpu_threads())::Int >> (Sys.ARCH !== :aarch64)
+const syst = @load_preference("syst", get_cpu_threads())
+const nc = @load_preference("nc", syst >> (Sys.ARCH !== :aarch64))
 
-let syst = static(get_cpu_threads()), nc = static(syst >> (Sys.ARCH !== :aarch64))
-  global num_l1cache() = nc
-  global num_cores() = nc
-  global sys_threads() = syst
-end
+_get_num_cores() = nc
+num_l1cache() = static(nc)
+num_cores() = static(nc)
+sys_threads() = static(syst)
+
 @static if Sys.ARCH === :aarch64
   num_l2cache() = static(1)
   num_l3cache() = static(0)

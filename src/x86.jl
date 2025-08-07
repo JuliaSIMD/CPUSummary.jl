@@ -5,34 +5,17 @@ num_sockets() = static(1)
 
 _get_num_cores()::Int = clamp(CpuId.cpucores(), 1, (get_cpu_threads())::Int)
 
-let nc = static(_get_num_cores())
-  global num_l1cache() = nc
-  global num_cores() = nc
-end
-let syst = static((get_cpu_threads())::Int)
-  global sys_threads() = syst
-end
+const nc = @load_preference("nc", _get_num_cores())
+const syst = @load_preference("syst", get_cpu_threads())
+
+num_l1cache() = static(nc)
+num_cores() = static(nc)
+sys_threads() = static(syst)
 num_l2cache() = num_l1cache()
 num_l3cache() = static(1)
 num_l4cache() = static(0)
-
-const PrecompiledCacheSize = let cs = CpuId.cachesize()
-  ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
-end
-const PrecompiledCacheInclusive = CpuId.cacheinclusive()
 cache_inclusive(_) = False()
-@noinline function _eval_cache_size(cachesize)
-  for (i, csi) in enumerate(cachesize)
-    @eval cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(csi))
-  end
-end
-@noinline function _eval_cache_inclusive(cacheinclusive)
-  for (i, cii) in enumerate(cacheinclusive)
-    @eval cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(cii != 0))
-  end
-end
-_eval_cache_size(PrecompiledCacheSize)
-_eval_cache_inclusive(PrecompiledCacheInclusive)
+
 # TODO: implement
 cache_associativity(_) = static(0)
 
@@ -45,15 +28,15 @@ let lnsize = static(CpuId.cachelinesize())
 end
 cache_size(_) = StaticInt{0}()
 
-# cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
-function _extra_init()
-  cs = let cs = CpuId.cachesize()
+const cs = @load_preference("cs", 
+  let cs = CpuId.cachesize()
     ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
-  end
-  cs !== PrecompiledCacheSize && _eval_cache_size(cs)
-  ci = CpuId.cacheinclusive()
-  ci !== PrecompiledCacheInclusive && _eval_cache_inclusive(ci)
-  return nothing
+  end)
+const ci = @load_preference("ci", CpuId.cacheinclusive())
+
+for (i, csi) in enumerate(cs)
+  @eval cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(csi))
 end
-
-
+for (i, cii) in enumerate(ci)
+  @eval cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(cii != 0))
+end
