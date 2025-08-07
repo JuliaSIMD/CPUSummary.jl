@@ -1,7 +1,6 @@
 module CPUSummary
-if isdefined(Base, :Experimental) &&
-   isdefined(Base.Experimental, Symbol("@max_methods"))
-    @eval Base.Experimental.@max_methods 1
+if isdefined(Base, :Experimental) && isdefined(Base.Experimental, Symbol("@max_methods"))
+  @eval Base.Experimental.@max_methods 1
 end
 
 using Static
@@ -52,22 +51,22 @@ if (Sys.ARCH === :x86_64)
 else
   include("generic_topology.jl")
 end
-function __init__()
-  ccall(:jl_generating_output, Cint, ()) == 1 && return
-  nc = _get_num_cores()
-  syst = Sys.CPU_THREADS::Int
-  if nc != num_l1cache()
-    @eval num_l1cache() = static($nc)
-  end
-  if nc != num_cores()
-    @eval num_cores() = static($nc)
-  end
-  if syst != sys_threads()
-    @eval sys_threads() = static($syst)
-  end
-  _extra_init()
-  return nothing
-end
+# function __init__()
+#   ccall(:jl_generating_output, Cint, ()) == 1 && return
+#   nc = _get_num_cores()
+#   syst = Sys.CPU_THREADS::Int
+#   if nc != num_l1cache()
+#     @eval num_l1cache() = static($nc)
+#   end
+#   if nc != num_cores()
+#     @eval num_cores() = static($nc)
+#   end
+#   if syst != sys_threads()
+#     @eval sys_threads() = static($syst)
+#   end
+#   # _extra_init()
+#   return nothing
+# end
 
 
 # end
@@ -80,7 +79,7 @@ cache_linesize() = cache_linesize(Val(1))
 function num_cache_levels()
   numl4 = num_l4cache()
   numl4 === nothing && return nothing
-  ifelse(
+  return ifelse(
     eq(numl4, Zero()),
     ifelse(
       eq(num_l3cache(), Zero()),
@@ -96,8 +95,8 @@ function num_cache_levels()
 end
 
 # explicit precompilation only on Julia v1.9 and newer
-if VERSION >= v"1.9"
-  include("precompile.jl")
-end
+# if VERSION >= v"1.9"
+#     include("precompile.jl")
+# end
 
 end

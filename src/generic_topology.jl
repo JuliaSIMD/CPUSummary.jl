@@ -35,14 +35,16 @@ end
 cache_associativity(::Union{Val{2},StaticInt{2}}) = StaticInt{0}()
 cache_type(::Union{Val{2},StaticInt{2}}) = Val{:Unified}()
 cache_inclusive(_) = False()
-@static if Sys.ARCH === :aarch64 && (Sys.isapple() || occursin("apple", Sys.CPU_NAME::String))
+@static if Sys.ARCH === :aarch64 &&
+           (Sys.isapple() || occursin("apple", Sys.CPU_NAME::String))
   cache_linesize(_) = StaticInt{128}() # assume...
 else
   cache_linesize(_) = StaticInt{64}() # assume...
 end
 cache_size(_) = StaticInt{0}()
 
-@static if Sys.ARCH === :aarch64 && (Sys.isapple() || occursin("apple", Sys.CPU_NAME::String))
+@static if Sys.ARCH === :aarch64 &&
+           (Sys.isapple() || occursin("apple", Sys.CPU_NAME::String))
 else
   cache_type(::Union{Val{3},StaticInt{3}}) = Val{:Unified}()
   cache_size(::Union{Val{3},StaticInt{3}}) = StaticInt{1441792}()

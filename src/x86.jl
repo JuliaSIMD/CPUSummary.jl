@@ -20,19 +20,76 @@ const PrecompiledCacheSize = let cs = CpuId.cachesize()
   ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
 end
 const PrecompiledCacheInclusive = CpuId.cacheinclusive()
-cache_inclusive(_) = False()
-@noinline function _eval_cache_size(cachesize)
-  for (i, csi) in enumerate(cachesize)
-    @eval cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(csi))
+# cache_inclusive(_) = False()
+# @noinline function _eval_cache_size(cachesize)
+#   for (i, csi) in enumerate(cachesize)
+#     @eval cache_size(::Union{Val{$i},StaticInt{$i}}) = $(static(csi))
+#   end
+# end
+# @noinline function _eval_cache_inclusive(cacheinclusive)
+#   for (i, cii) in enumerate(cacheinclusive)
+#     @eval cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(cii != 0))
+#   end
+# end
+# _eval_cache_size(PrecompiledCacheSize)
+# _eval_cache_inclusive(PrecompiledCacheInclusive)
+
+
+cache_size(::Val{S}) where {S} = cache_size(S)
+cache_size(::StaticInt{S}) where {S} = cache_size(S)
+
+@inline @generated function cache_size(cachesize)
+  cs = let cs = CpuId.cachesize()
+    ntuple(i -> i == 3 ? cs[3] ÷ _get_num_cores() : cs[i], length(cs))
   end
-end
-@noinline function _eval_cache_inclusive(cacheinclusive)
-  for (i, cii) in enumerate(cacheinclusive)
-    @eval cache_inclusive(::Union{Val{$i},StaticInt{$i}}) = $(static(cii != 0))
+
+  cache_sizes = map(enumerate(cs)) do (i, csi)
+
+    return :(
+      if cachesize == $i
+        return static($csi)
+      end
+    )
   end
+
+  return quote
+    begin
+      $(cache_sizes...)
+    end
+  end
+
 end
-_eval_cache_size(PrecompiledCacheSize)
-_eval_cache_inclusive(PrecompiledCacheInclusive)
+cache_inclusive(::Val{S}) where {S} = cache_inclusive(S)
+cache_inclusive(::StaticInt{S}) where {S} = cache_inclusive(S)
+
+@inline @generated function cache_inclusive(cacheinclusive)
+  ci = CpuId.cacheinclusive()
+
+  cache_inclusives = map(enumerate(ci)) do (i, cii)
+    val = cii != 0
+    return :(
+      if cacheinclusive == $i
+        return static($val)
+      end
+    )
+  end
+
+  if !isempty(cache_inclusives)
+    push!(cache_inclusives, :(return False()))
+  else
+    cache_inclusives = [:(return False())]
+  end
+
+  return quote
+    begin
+      $(cache_inclusives...)
+    end
+  end
+
+
+end
+
+
 # TODO: implement
 cache_associativity(_) = static(0)
 
@@ -43,7 +100,7 @@ cache_type(_) = Val{:Unified}()
 let lnsize = static(CpuId.cachelinesize())
   global cache_linesize(_) = lnsize
 end
-cache_size(_) = StaticInt{0}()
+# cache_size(_) = StaticInt{0}()
 
 # cache_size(::Union{Val{3},StaticInt{3}}) = num_cores() * StaticInt{1441792}()
 function _extra_init()
@@ -55,5 +112,3 @@ function _extra_init()
   ci !== PrecompiledCacheInclusive && _eval_cache_inclusive(ci)
   return nothing
 end
-
-
